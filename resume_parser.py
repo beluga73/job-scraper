@@ -1,11 +1,11 @@
 import pdfplumber
-from google import genai
+from openai import OpenAI
 import config
 from parse_resume_with_ai import parse_resume_with_ai
 import json
 from supabase_utils import save_resume_to_supabase 
 
-client = genai.Client(api_key=config.GEMINI_FIRST_API_KEY)
+client = OpenAI(api_key=config.OPENAI_API_KEY)
 
 def extract_text_from_pdf(pdf_path):
     """

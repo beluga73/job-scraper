@@ -13,11 +13,9 @@ SUPABASE_RESUME_TABLE_NAME = "resumes"
 SUPABASE_CUSTOMIZED_RESUMES_TABLE_NAME = "customized_resumes"
 SUPABASE_STORAGE_BUCKET="resumes"
 
-# --- Google Configuration ---
-GEMINI_FIRST_API_KEY = os.environ.get("GEMINI_FIRST_API_KEY")
-GEMINI_SECOND_API_KEY = os.environ.get("GEMINI_SECOND_API_KEY")
-GEMINI_MODEL_NAME = "gemini-2.0-flash"
-GEMINI_SECONDARY_MODEL_NAME = "gemini-2.0-flash-lite"
+# --- OpenAI Configuration ---
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+OPENAI_MODEL_NAME = "gpt-4o"  # Using GPT-4 Omni for best quality and cost-effectiveness
 
 # --- Resume Scoring Configuration ---
 JOBS_TO_SCORE_PER_RUN = 10 # Limit jobs processed per script execution (respects API limits)

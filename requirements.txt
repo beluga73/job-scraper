@@ -4,7 +4,7 @@ python-dotenv
 supabase
 httpx
 pdfplumber
-google-genai
+openai
 pydantic
 playwright
 html2text

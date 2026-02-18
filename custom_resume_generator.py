@@ -8,8 +8,7 @@ import json # Import json for parsing LLM output
 import pdf_generator 
 import re
 import asyncio 
-from google import genai
-from google.genai import types
+from openai import OpenAI
 from models import (
     Education, Experience, Project, Certification, Links, Resume,
     SummaryOutput, SkillsOutput, ExperienceListOutput, SingleExperienceOutput,
@@ -20,8 +19,8 @@ import time
 # --- Logging Setup ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# --- Initialize Gemini Client ---
-client = genai.Client(api_key=config.GEMINI_SECOND_API_KEY)
+# --- Initialize OpenAI Client ---
+client = OpenAI(api_key=config.OPENAI_API_KEY)
 
 # --- LLM Personalization Function ---
 def extract_json_from_text(text: str) -> str:
@@ -227,21 +226,21 @@ async def personalize_section_with_llm(
         # ]
 
         try:
-            response = client.models.generate_content(
-                model=config.GEMINI_MODEL_NAME,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    temperature=0.2,
-                    system_instruction=system_prompt,
-                    response_mime_type='application/json',
-                    response_schema=OutputModel,
-
-                )
+            response = client.beta.messages.parse(
+                model="gpt-4o-2024-08-06",
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                response_format=OutputModel,
             )
            
-            llm_output = response.text.strip()
+            parsed_output = response.content[0].parsed
+            llm_output = json.dumps(parsed_output.model_dump(), indent=2)
             
-            logging.info(f"Received response from Gemini for section: {section_name}")
+            logging.info(f"Received response from OpenAI for section: {section_name}")
 
             try:
                 # Validate and parse the JSON output against the Pydantic model
@@ -371,19 +370,19 @@ async def validate_customization(
     # ]
 
     try:
-        response = client.models.generate_content(
-                model=config.GEMINI_MODEL_NAME,
-                contents=user_prompt,
-                config=types.GenerateContentConfig(
-                    temperature=0.0,
-                    system_instruction=system_prompt,
-                    response_mime_type='application/json',
-                    response_schema=ValidationResponse,
-
-                )
-            )
+        response = client.beta.messages.parse(
+            model="gpt-4o-2024-08-06",
+            messages=[
+                {
+                    "role": "user",
+                    "content": user_prompt
+                }
+            ],
+            response_format=ValidationResponse,
+        )
        
-        llm_output = response.text.strip()
+        parsed_output = response.content[0].parsed
+        llm_output = json.dumps(parsed_output.model_dump(), indent=2)
         
         try:
             # Validate and parse the JSON output against the Pydantic model

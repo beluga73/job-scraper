@@ -5,23 +5,23 @@ This module takes extracted resume text and uses AI to parse it into structured 
 
 import json
 import os
-from google import genai
-from google.genai import types
+from openai import OpenAI
 from typing import List, Optional
 import models
 
 
-def parse_resume_with_ai(client: genai.Client, resume_text):
+def parse_resume_with_ai(client: OpenAI, resume_text):
     """
-    Send resume text to an AI model and get structured information back.
+    Send resume text to OpenAI and get structured information back.
     
     Args:
+        client (OpenAI): OpenAI client instance
         resume_text (str): The plain text extracted from the resume
         
     Returns:
         dict: Structured resume information
     """
-    print("Processing resume with AI model...")
+    print("Processing resume with OpenAI...")
 
     prompt = f"""Extract and return the structured resume information from the text below. Only use what is explicitly stated in the text and do not infer or invent any details.
 
@@ -29,12 +29,17 @@ def parse_resume_with_ai(client: genai.Client, resume_text):
     {resume_text}
     """
 
-    response = client.models.generate_content(
-        model="gemini-2.0-flash", 
-        contents=prompt, 
-        config=types.GenerateContentConfig(
-            response_mime_type='application/json',
-            response_schema=models.Resume,
-        )
+    response = client.beta.messages.parse(
+        model="gpt-4o-2024-08-06",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ],
+        response_format=models.Resume,
     )
-    return response.text
+    
+    # Extract the parsed content
+    parsed_resume = response.content[0].parsed
+    return json.dumps(parsed_resume.model_dump(), indent=2)

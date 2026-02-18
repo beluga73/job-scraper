@@ -1,4 +1,4 @@
-from google import genai
+from openai import OpenAI
 import time
 import json
 import logging
@@ -13,8 +13,8 @@ import supabase_utils
 # --- Setup Logging ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# --- Initialize Gemini Client ---
-client = genai.Client(api_key=config.GEMINI_FIRST_API_KEY)
+# --- Initialize OpenAI Client ---
+client = OpenAI(api_key=config.OPENAI_API_KEY)
 
 # --- Helper Functions ---
 
@@ -141,13 +141,17 @@ def get_resume_score_from_ai(resume_text: str, job_details: Dict[str, Any]) -> O
 
     try:
         logging.info(f"Requesting score for job_id: {job_details.get('job_id')}")
-        response = client.models.generate_content(
-            model=config.GEMINI_MODEL_NAME, 
-            contents=prompt
-            )
+        response = client.chat.completions.create(
+            model=config.OPENAI_MODEL_NAME, 
+            messages=[
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.0,
+            max_tokens=10
+        )
 
         # Attempt to parse the score
-        score_text = response.text.strip()
+        score_text = response.choices[0].message.content.strip()
         score = int(score_text)
         if 0 <= score <= 100:
             logging.info(f"Received score {score} for job_id: {job_details.get('job_id')}")
@@ -156,12 +160,11 @@ def get_resume_score_from_ai(resume_text: str, job_details: Dict[str, Any]) -> O
             logging.warning(f"Received score out of range ({score}) for job_id: {job_details.get('job_id')}. Raw response: '{score_text}'")
             return None
     except ValueError:
-        logging.error(f"Could not parse integer score from Gemini response for job_id: {job_details.get('job_id')}. Raw response: '{response.text.strip()}'")
+        logging.error(f"Could not parse integer score from OpenAI response for job_id: {job_details.get('job_id')}. Raw response: '{score_text}'")
         return None
     except Exception as e:
         # Catch potential API errors (rate limits, etc.)
-        logging.error(f"Error calling Gemini API for job_id {job_details.get('job_id')}: {e}")
-        # Consider specific error handling for rate limits if needed
+        logging.error(f"Error calling OpenAI API for job_id {job_details.get('job_id')}: {e}")
         return None
 
 
