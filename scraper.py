@@ -8,29 +8,27 @@ import config
 import user_agents
 import supabase_utils
 import html2text
-from google import genai
-from google.genai import types
+from openai import OpenAI
 import json
 
 # --- Setup Logging ---
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-# --- Initialize Gemini Client ---
-client = genai.Client(api_key=config.GEMINI_FIRST_API_KEY)
+# --- Initialize OpenAI Client ---
+client = OpenAI(api_key=config.OPENAI_API_KEY)
 
 # Convert description to Markdown
 def convert_plain_text_to_markdown_with_ai(text: str) -> str | None:
     """
-    Convert plain text to Markdown using Gemini Flash Lite model.
+    Convert plain text to Markdown using OpenAI model.
     """
     if not text:
         logging.info("Received empty text for Markdown conversion, returning empty string.")
         return "" 
 
-    logging.info("Converting description text to Markdown using Gemini Lite...")
+    logging.info("Converting description text to Markdown using OpenAI...")
 
-    system_prompt = f"""
-    You are a Markdown formatter.
+    system_prompt = """You are a Markdown formatter.
     Your task is to convert plain text into well-structured Markdown.
     You must not alter, paraphrase, or omit any part of the input text.
     Only apply formatting using Markdown syntax such as:
@@ -41,11 +39,9 @@ def convert_plain_text_to_markdown_with_ai(text: str) -> str | None:
 
     Do not add or remove any words, punctuation, or content.
     Do not include any explanation or commentary.
-    Only return the formatted Markdown.
-    """
+    Only return the formatted Markdown."""
 
-    prompt = f"""You are a Markdown formatter.
-    Convert the following job description into Markdown format:
+    prompt = f"""Convert the following job description into Markdown format:
 
     ---
     {text}
@@ -53,23 +49,23 @@ def convert_plain_text_to_markdown_with_ai(text: str) -> str | None:
     """
 
     try: 
-        response = client.models.generate_content(
-            model=config.GEMINI_SECONDARY_MODEL_NAME,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=system_prompt,
-                temperature=0.2,
-            )
+        response = client.chat.completions.create(
+            model=config.OPENAI_MODEL_NAME,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.2,
         )
-        markdown_content = response.text.strip()
+        markdown_content = response.choices[0].message.content.strip()
         
         logging.info("Successfully converted text to Markdown.")
         if not markdown_content:
-            logging.warning("Gemini returned empty markdown content for a non-empty input.") 
+            logging.warning("OpenAI returned empty markdown content for a non-empty input.") 
             return ""
         return markdown_content
     except Exception as e: 
-        logging.error(f"Error during Gemini Markdown conversion: {e}") 
+        logging.error(f"Error during OpenAI Markdown conversion: {e}") 
         return None 
 
 # --- LinkedIn Scraping Logic ---

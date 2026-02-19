@@ -105,7 +105,7 @@ def format_resume_to_text(resume_data: Dict[str, Any]) -> str:
 
 def get_resume_score_from_ai(resume_text: str, job_details: Dict[str, Any]) -> Optional[int]:
     """
-    Sends resume and job details to Gemini to get a suitability score.
+    Sends resume and job details to OpenAI to get a suitability score.
     Returns the score as an integer (0-100) or None if scoring fails.
     """
     if not resume_text or not job_details or not job_details.get('description'):
@@ -238,8 +238,8 @@ def rescore_jobs_with_custom_resume():
             logging.error(f"Failed to extract text from custom resume PDF for job_id {job_id}. Skipping re-score.")
             failed_rescores += 1
             if i < len(jobs_to_rescore) - 1:
-                logging.debug(f"Waiting {config.GEMINI_REQUEST_DELAY_SECONDS} seconds before next job...")
-                time.sleep(config.GEMINI_REQUEST_DELAY_SECONDS)
+                logging.debug(f"Waiting {config.OPENAI_REQUEST_DELAY_SECONDS} seconds before next job...")
+                time.sleep(config.OPENAI_REQUEST_DELAY_SECONDS)
             continue
         
         logging.debug(f"Custom resume text for job {job_id} (first 200 chars): {custom_resume_text[:200]}")
@@ -254,8 +254,8 @@ def rescore_jobs_with_custom_resume():
             failed_rescores += 1 
 
         if i < len(jobs_to_rescore) - 1: 
-            logging.debug(f"Waiting {config.GEMINI_REQUEST_DELAY_SECONDS} seconds before next API call...")
-            time.sleep(config.GEMINI_REQUEST_DELAY_SECONDS)
+            logging.debug(f"Waiting {config.OPENAI_REQUEST_DELAY_SECONDS} seconds before next API call...")
+            time.sleep(config.OPENAI_REQUEST_DELAY_SECONDS)
 
     rescore_end_time = time.time()
     logging.info("--- Job Re-scoring Finished ---")
@@ -310,8 +310,8 @@ def main():
                     failed_initial_scores += 1
 
                 if i < len(jobs_to_score_initially) - 1:
-                    logging.debug(f"Waiting {config.GEMINI_REQUEST_DELAY_SECONDS} seconds before next API call...")
-                    time.sleep(config.GEMINI_REQUEST_DELAY_SECONDS)
+                    logging.debug(f"Waiting {config.OPENAI_REQUEST_DELAY_SECONDS} seconds before next API call...")
+                    time.sleep(config.OPENAI_REQUEST_DELAY_SECONDS)
             
             initial_score_end_time = time.time()
             logging.info("--- Initial Scoring Phase Finished ---")
@@ -328,8 +328,8 @@ def main():
 
 
 if __name__ == "__main__":
-    if not config.GEMINI_FIRST_API_KEY:
-        logging.error("GEMINI_FIRST_API_KEY environment variable not set.")
+    if not config.OPENAI_API_KEY:
+        logging.error("OPENAI_API_KEY environment variable not set.")
     elif not config.SUPABASE_URL or not config.SUPABASE_SERVICE_ROLE_KEY:
         logging.error("Supabase URL or Key environment variable not set.")
     elif not config.LINKEDIN_EMAIL:

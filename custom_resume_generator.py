@@ -57,7 +57,7 @@ async def personalize_section_with_llm(
     job_details: Dict[str, Any]
     ) -> Any:
     """
-    Uses Gemini Flash 2.0 to personalize a specific section of the resume for the given job.
+    Uses OpenAI to personalize a specific section of the resume for the given job.
     """
     if not section_content:
         logging.warning(f"Skipping personalization for empty section: {section_name}")
@@ -218,7 +218,7 @@ async def personalize_section_with_llm(
 
     responses = []
     for prompt in prompts:
-        logging.info(f"Sending prompt to Gemini for section: {section_name} with structured output schema.")
+        logging.info(f"Sending prompt to OpenAI for section: {section_name} with structured output schema.")
 
         # messages = [
         # {'role': 'system', 'content': 'You are an expert resume writer. Only rewrite or generate the specified resume section. Never return the full resume or any unrelated content. Output strictly in the JSON format defined by the provided schema. Do not add any explanatory text before or after the JSON object.'},
@@ -260,11 +260,11 @@ async def personalize_section_with_llm(
 
 
         except Exception as e:
-            logging.error(f"Error calling Gemini or processing response for section {section_name}: {e}")
+            logging.error(f"Error calling OpenAI or processing response for section {section_name}: {e}")
             # Fallback: return original content if LLM call fails
             return section_content
 
-    logging.info(f"Received {len(responses)} responses from Gemini for section: {section_name}")
+    logging.info(f"Received {len(responses)} responses from OpenAI for section: {section_name}")
 
     if(section_name == "summary"):
         return getattr(responses[0], output_key)
@@ -402,8 +402,8 @@ async def validate_customization(
 
 
     except Exception as e:
-        logging.error(f"Error calling Gemini or processing response: {e}")
-        return false, "Error calling Gemini or processing response."
+        logging.error(f"Error calling OpenAI or processing response: {e}")
+        return False, "Error calling OpenAI or processing response."
 
 # --- Main Processing Logic ---
 async def process_job(job_details: Dict[str, Any], base_resume_details: Resume):
@@ -573,7 +573,7 @@ async def run_job_processing_cycle():
 
     logging.info(f"Found {len(jobs_to_process)} jobs to process.")
 
-    # 3. Process Each Job Sequentially (to avoid overwhelming Gemini/resources)
+    # 3. Process Each Job Sequentially (to avoid overwhelming OpenAI/resources)
     for job_details in jobs_to_process:
         await process_job(job_details, base_resume_details) # Pass base resume
 

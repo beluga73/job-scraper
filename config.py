@@ -19,7 +19,7 @@ OPENAI_MODEL_NAME = "gpt-4o"  # Using GPT-4 Omni for best quality and cost-effec
 
 # --- Resume Scoring Configuration ---
 JOBS_TO_SCORE_PER_RUN = 10 # Limit jobs processed per script execution (respects API limits)
-GEMINI_REQUEST_DELAY_SECONDS = 6 # Delay between Gemini API calls (10 requests/min)
+OPENAI_REQUEST_DELAY_SECONDS = 6 # Delay between OpenAI API calls
 
 # --- LinkedIn Configuration ---
 LINKEDIN_EMAIL = os.environ.get("LINKEDIN_EMAIL")
