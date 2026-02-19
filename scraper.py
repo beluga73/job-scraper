@@ -87,6 +87,7 @@ def _fetch_linkedin_job_ids(search_query: str, location: str) -> list:
             "geoId": config.LINKEDIN_GEO_ID,
             "f_TPR": config.LINKEDIN_JOB_POSTING_DATE,
             "f_WT": config.LINKEDIN_F_WT,
+            "f_E": config.LINKEDIN_SENIORITY_LEVEL,
             "start": start
         }
         
