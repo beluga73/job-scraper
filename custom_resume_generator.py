@@ -226,7 +226,7 @@ async def personalize_section_with_llm(
         # ]
 
         try:
-            response = client.beta.messages.parse(
+            response = client.beta.chat.completions.parse(
                 model="gpt-4o-2024-08-06",
                 messages=[
                     {
@@ -237,7 +237,7 @@ async def personalize_section_with_llm(
                 response_format=OutputModel,
             )
            
-            parsed_output = response.content[0].parsed
+            parsed_output = response.choices[0].message.parsed
             llm_output = json.dumps(parsed_output.model_dump(), indent=2)
             
             logging.info(f"Received response from OpenAI for section: {section_name}")
@@ -370,7 +370,7 @@ async def validate_customization(
     # ]
 
     try:
-        response = client.beta.messages.parse(
+        response = client.beta.chat.completions.parse(
             model="gpt-4o-2024-08-06",
             messages=[
                 {
@@ -381,7 +381,7 @@ async def validate_customization(
             response_format=ValidationResponse,
         )
        
-        parsed_output = response.content[0].parsed
+        parsed_output = response.choices[0].message.parsed
         llm_output = json.dumps(parsed_output.model_dump(), indent=2)
         
         try:

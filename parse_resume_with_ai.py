@@ -29,7 +29,7 @@ def parse_resume_with_ai(client: OpenAI, resume_text):
     {resume_text}
     """
 
-    response = client.beta.messages.parse(
+    response = client.beta.chat.completions.parse(
         model="gpt-4o-2024-08-06",
         messages=[
             {
@@ -41,5 +41,5 @@ def parse_resume_with_ai(client: OpenAI, resume_text):
     )
     
     # Extract the parsed content
-    parsed_resume = response.content[0].parsed
+    parsed_resume = response.choices[0].message.parsed
     return json.dumps(parsed_resume.model_dump(), indent=2)
