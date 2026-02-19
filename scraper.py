@@ -72,21 +72,6 @@ def convert_plain_text_to_markdown_with_ai(text: str) -> str | None:
         logging.error(f"Error during Gemini Markdown conversion: {e}") 
         return None 
 
-def _get_careers_future_job_company_name(job_item: dict) -> str | None:
-    """Helper to extract company name, preferring hiringCompany."""
-    if not isinstance(job_item, dict):
-        return None
-    
-    hiring_company = job_item.get('hiringCompany')
-    if isinstance(hiring_company, dict) and hiring_company.get('name'):
-        return hiring_company['name']
-    
-    posted_company = job_item.get('postedCompany')
-    if isinstance(posted_company, dict) and posted_company.get('name'):
-        return posted_company['name']
-        
-    return None
-
 # --- LinkedIn Scraping Logic ---
 def _fetch_linkedin_job_ids(search_query: str, location: str) -> list:
     """Fetches job IDs from LinkedIn search results pages with delays, rotating user agents, and retries."""
@@ -98,7 +83,22 @@ def _fetch_linkedin_job_ids(search_query: str, location: str) -> list:
 
     logging.info(f"--- Starting Phase 1: Scraping Job IDs (Max Start: {max_start}) ---")
     while start <= max_start:
-        target_url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={search_query.replace(' ', '%2B')}&location={location}&geoId={config.LINKEDIN_GEO_ID}&f_TPR={config.LINKEDIN_JOB_POSTING_DATE}&f_JT={config.LINKEDIN_JOB_TYPE}&f_WT={config.LINKEDIN_F_WT}&start={start}"
+        # Build URL with optional job type filter
+        url_parts = [
+            f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search",
+            f"keywords={search_query.replace(' ', '%2B')}",
+            f"location={location}",
+            f"geoId={config.LINKEDIN_GEO_ID}",
+            f"f_TPR={config.LINKEDIN_JOB_POSTING_DATE}",
+            f"f_WT={config.LINKEDIN_F_WT}",
+            f"start={start}"
+        ]
+        
+        # Only add job type filter if specified
+        if hasattr(config, 'LINKEDIN_JOB_TYPE') and config.LINKEDIN_JOB_TYPE:
+            url_parts.append(f"f_JT={config.LINKEDIN_JOB_TYPE}")
+        
+        target_url = "&".join(url_parts)
 
         sleep_time = random.uniform(5.0, 15.0)
     
@@ -728,22 +728,6 @@ if __name__ == "__main__":
             total_new_jobs_saved += len(new_linkedin_job_details)
         else:
             print(f"\nNo new job details were fetched or processed for query '{query}'.")
-
-    # Get jobs from Careers Future
-    logging.info(f"\n--- Starting Careers Future Job Scraping ---")
-    for query in config.CAREERS_FUTURE_SEARCH_QUERIES:
-        logging.info(f"\n{'='*20} Processing Careers Future Search Query: '{query}' {'='*20}")
-
-        # 1. Process the query: Scrape IDs, filter, fetch new details
-        new_careers_future_job_details = process_careers_future_query(query)
-
-        # 2. Save the NEW scraped data to Supabase
-        if new_careers_future_job_details:
-            logging.info(f"\n--- Saving {len(new_careers_future_job_details)} new job(s) for query '{query}' ---")
-            supabase_utils.save_jobs_to_supabase(new_careers_future_job_details)
-            total_new_jobs_saved += len(new_careers_future_job_details)
-        else:
-            logging.info(f"\nNo new job details were fetched or processed for query '{query}'.")
 
     # --- End of Script ---      
     logging.info(f"\n{'='*20} Job scraping script finished {'='*20}")
