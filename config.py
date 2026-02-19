@@ -15,11 +15,11 @@ SUPABASE_STORAGE_BUCKET="resumes"
 
 # --- OpenAI Configuration ---
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
-OPENAI_MODEL_NAME = "gpt-4o"  # Using GPT-4 Omni for best quality and cost-effectiveness
+OPENAI_MODEL_NAME = "gpt-4o"  # For resume parsing and resume customization
+OPENAI_SCORING_MODEL_NAME = "gpt-4o-mini"  # For job scoring (simple 0-100 integer, ~15x cheaper)
 
 # --- Resume Scoring Configuration ---
-JOBS_TO_SCORE_PER_RUN = 10 # Limit jobs processed per script execution (respects API limits)
-OPENAI_REQUEST_DELAY_SECONDS = 6 # Delay between OpenAI API calls
+JOBS_TO_SCORE_PER_RUN = 10 # Limit jobs processed per script execution
 
 # --- LinkedIn Configuration ---
 LINKEDIN_EMAIL = os.environ.get("LINKEDIN_EMAIL")

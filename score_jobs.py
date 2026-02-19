@@ -142,7 +142,7 @@ def get_resume_score_from_ai(resume_text: str, job_details: Dict[str, Any]) -> O
     try:
         logging.info(f"Requesting score for job_id: {job_details.get('job_id')}")
         response = client.chat.completions.create(
-            model=config.OPENAI_MODEL_NAME, 
+            model=config.OPENAI_SCORING_MODEL_NAME,
             messages=[
                 {"role": "user", "content": prompt}
             ],
@@ -237,9 +237,6 @@ def rescore_jobs_with_custom_resume():
         if not custom_resume_text:
             logging.error(f"Failed to extract text from custom resume PDF for job_id {job_id}. Skipping re-score.")
             failed_rescores += 1
-            if i < len(jobs_to_rescore) - 1:
-                logging.debug(f"Waiting {config.OPENAI_REQUEST_DELAY_SECONDS} seconds before next job...")
-                time.sleep(config.OPENAI_REQUEST_DELAY_SECONDS)
             continue
         
         logging.debug(f"Custom resume text for job {job_id} (first 200 chars): {custom_resume_text[:200]}")
@@ -252,10 +249,6 @@ def rescore_jobs_with_custom_resume():
                 failed_rescores += 1 
         else:
             failed_rescores += 1 
-
-        if i < len(jobs_to_rescore) - 1: 
-            logging.debug(f"Waiting {config.OPENAI_REQUEST_DELAY_SECONDS} seconds before next API call...")
-            time.sleep(config.OPENAI_REQUEST_DELAY_SECONDS)
 
     rescore_end_time = time.time()
     logging.info("--- Job Re-scoring Finished ---")
@@ -308,10 +301,6 @@ def main():
                         failed_initial_scores += 1
                 else:
                     failed_initial_scores += 1
-
-                if i < len(jobs_to_score_initially) - 1:
-                    logging.debug(f"Waiting {config.OPENAI_REQUEST_DELAY_SECONDS} seconds before next API call...")
-                    time.sleep(config.OPENAI_REQUEST_DELAY_SECONDS)
             
             initial_score_end_time = time.time()
             logging.info("--- Initial Scoring Phase Finished ---")
