@@ -2,9 +2,7 @@
 name: Hourly Job Scorer
 
 on:
-  schedule:
-    # Runs every hour at the beginning of the hour
-    - cron: "0 * * * *"
+  workflow_call: # Allows this to be triggered by other workflows
   workflow_dispatch: # Allows manual triggering from the Actions tab
 
 jobs:

@@ -3,8 +3,8 @@ name: Daily Job Scraper
 
 on:
   schedule:
-    # Runs every day at 10:00 UTC (6:00 PM SGT)
-    - cron: "0 10 * * *"
+    # Runs every hour from 9am to 8pm UTC (5pm to 4am SGT next day)
+    - cron: "0 8-19 * * *"
   workflow_dispatch: # Allows manual triggering from the Actions tab
 
 jobs:
@@ -31,3 +31,9 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }} # OpenAI API Key
         run: python scraper.py # Execute your script
+
+      - name: Trigger job scorer workflow
+        run: |
+          gh workflow run score_jobs.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
