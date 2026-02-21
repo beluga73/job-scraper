@@ -45,4 +45,4 @@ jobs:
             --title "$TITLE" \
             --body-file job_alerts.md \
             --label "job-alert" \
-            --assignee "@me"
+            --assignee "${{ github.repository_owner }}"
