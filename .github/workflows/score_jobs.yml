@@ -32,3 +32,17 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           LINKEDIN_EMAIL: ${{ secrets.LINKEDIN_EMAIL }}
         run: python score_jobs.py # Execute the job scoring script
+
+      - name: Create job alert issue
+        if: hashFiles('job_alerts.md') != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Create the label if it doesn't exist yet
+          gh label create "job-alert" --color "0075ca" --description "Automated job score alert" 2>/dev/null || true
+          TITLE="🎯 New Job Matches Found — $(date +'%b %d, %Y %H:%M UTC')"
+          gh issue create \
+            --title "$TITLE" \
+            --body-file job_alerts.md \
+            --label "job-alert" \
+            --assignee "@me"

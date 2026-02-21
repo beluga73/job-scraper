@@ -1,0 +1,38 @@
+# .github/workflows/cleanup_job_alerts.yml
+name: Cleanup Job Alert Issues
+
+on:
+  schedule:
+    # Runs every Wednesday at 00:00 UTC
+    - cron: "0 0 * * 3"
+  workflow_dispatch: # Allows manual triggering from the Actions tab
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Close all open job-alert issues
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Fetching open job-alert issues..."
+          ISSUE_NUMBERS=$(gh issue list \
+            --repo "$GITHUB_REPOSITORY" \
+            --label "job-alert" \
+            --state open \
+            --json number \
+            --jq '.[].number')
+
+          if [ -z "$ISSUE_NUMBERS" ]; then
+            echo "No open job-alert issues found. Nothing to clean up."
+            exit 0
+          fi
+
+          echo "Closing issues: $ISSUE_NUMBERS"
+          for NUMBER in $ISSUE_NUMBERS; do
+            gh issue close "$NUMBER" \
+              --repo "$GITHUB_REPOSITORY" \
+              --comment "Closed automatically by weekly cleanup."
+            echo "Closed issue #$NUMBER"
+          done

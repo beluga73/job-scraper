@@ -258,10 +258,34 @@ def rescore_jobs_with_custom_resume():
 
 # --- Main Execution ---
 
+HIGH_SCORE_THRESHOLD = 60
+
+
+def write_job_alerts_file(jobs: list) -> None:
+    """Writes a markdown file with high-scoring job details for GitHub issue creation."""
+    lines = [
+        f"## 🎯 New Job Matches (Score ≥ {HIGH_SCORE_THRESHOLD})\n",
+        f"Found **{len(jobs)}** new job match(es) this run:\n",
+        "| Job Title | Company | Level | Score |",
+        "|-----------|---------|-------|-------|",
+    ]
+    for job in jobs:
+        title = job.get('job_title', 'N/A')
+        company = job.get('company', 'N/A')
+        level = job.get('level', 'N/A')
+        score = job.get('resume_score', 'N/A')
+        lines.append(f"| {title} | {company} | {level} | **{score}** |")
+
+    with open("job_alerts.md", "w") as f:
+        f.write("\n".join(lines))
+    logging.info(f"Wrote job_alerts.md with {len(jobs)} job(s).")
+
+
 def main():
     """Main function to score jobs based on the target resume."""
     logging.info("--- Starting Job Scoring Script ---")
     overall_start_time = time.time()
+    newly_high_scored_jobs = []  # Collect jobs scored >= HIGH_SCORE_THRESHOLD in this run
 
     # --- Phase 1: Initial Scoring with Default Resume ---
     logging.info("--- Phase 1: Initial Scoring with Default Resume ---")
@@ -297,6 +321,14 @@ def main():
                 if score is not None:
                     if supabase_utils.update_job_score(job_id, score, resume_score_stage="initial"):
                         successful_initial_scores += 1
+                        if score >= HIGH_SCORE_THRESHOLD:
+                            newly_high_scored_jobs.append({
+                                "job_id": job_id,
+                                "job_title": job.get("job_title", "N/A"),
+                                "company": job.get("company", "N/A"),
+                                "level": job.get("level", "N/A"),
+                                "resume_score": score,
+                            })
                     else:
                         failed_initial_scores += 1
                 else:
@@ -309,7 +341,12 @@ def main():
             logging.info(f"Total initial scoring time: {initial_score_end_time - initial_score_start_time:.2f} seconds")
 
     # # --- Phase 2: Re-scoring with Custom Resumes ---
-    rescore_jobs_with_custom_resume() 
+    rescore_jobs_with_custom_resume()
+
+    # --- Write alert file if any high-scoring jobs were found ---
+    if newly_high_scored_jobs:
+        write_job_alerts_file(newly_high_scored_jobs)
+        logging.info(f"TRIGGER_NOTIFY: {len(newly_high_scored_jobs)} job(s) scored >= {HIGH_SCORE_THRESHOLD}")
 
     overall_end_time = time.time()
     logging.info("--- Job Scoring Script Finished (All Phases) ---")
