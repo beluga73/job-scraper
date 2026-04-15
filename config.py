@@ -43,7 +43,7 @@ ACTIVE_CHECK_RETRY_DELAY = 10 # Base delay for retrying active check
 # --- DO NOT MODITY THE ABOVE SECTION ---
 
 # --- LinkedIn Search Configuration ---
-LINKEDIN_SEARCH_QUERIES = ["fullstack developer", "frontend developer", "react developer", "backend developer", "node.js developer", "full stack web developer"]
+LINKEDIN_SEARCH_QUERIES = ["senior frontend developer", "react developer",]
 LINKEDIN_LOCATION = "Poland"
 LINKEDIN_GEO_ID = 105072130 # Poland
 
@@ -73,7 +73,7 @@ LINKEDIN_F_WT = "3,2,1"  # 3=Hybrid, 2=Remote, 1=Onsite (all types)
 # 5 = Director (10-15 years experience)
 # 6 = Executive (15+ years experience)
 # Separate multiple with commas, e.g., "1,2,3" for Internship + Entry + Associate
-LINKEDIN_SENIORITY_LEVEL = "1,2"  # Internship + Entry level
+LINKEDIN_SENIORITY_LEVEL = "4"  # Internship + Entry level
 
 #  --- Careers Future Search Configuration - REMOVED (Singapore only) ---
 # CAREERS_FUTURE_SEARCH_QUERIES = ["Fullstack Developer", "Frontend Developer", "React Developer", "Backend Developer", "Node.js Developer", "Full Stack Web Developer"]
